@@ -1,20 +1,22 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from '@supabase/supabase-js';
-import OpenAI from 'openai';
+import { Handler } from '@netlify/functions';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+ 
+const handler: Handler = async (event, context) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: 'ok',
+    };
   }
 
   try {
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+
     if (!openaiApiKey) {
       console.error('OPENAI_API_KEY environment variable is not set');
       throw new Error('OpenAI API key not configured');
@@ -26,30 +28,29 @@ serve(async (req) => {
       openaiApiKey: 'configured', // Don't send actual key to client
     };
 
-    return new Response(
-      JSON.stringify(config),
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return {
+      statusCode: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    };
   } catch (error) {
     console.error('Chat config error:', error);
-    
-    return new Response(
-      JSON.stringify({ 
+
+    return {
+      statusCode: 500,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
-        details: error instanceof Error ? error.stack : undefined
+        details: error instanceof Error ? error.stack : undefined,
       }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    };
   }
-});
+};
+
+export { handler as default };
