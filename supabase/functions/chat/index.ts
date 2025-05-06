@@ -1,4 +1,8 @@
 import { Handler } from '@netlify/functions';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-netlify';
+import { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../../../types/supabase';
+import { OpenAIError } from 'openai/dist/core/OpenAIError';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -12,6 +16,9 @@ const handler: Handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
+      headers: corsHeaders,
+      body: 'ok',
+    };
       headers: corsHeaders,
       body: 'ok',
     };
