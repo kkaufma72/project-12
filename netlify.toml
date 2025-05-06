@@ -38,7 +38,4 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[plugins]]
-  package = "@netlify/plugin-functions-core"
-
-[[plugins]]
   package = "@netlify/plugin-typescript"
